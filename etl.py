@@ -29,9 +29,21 @@ def process_log_file(cur, filepath):
     t = pd.to_datetime(df.ts, unit='ms')
     
     # insert time data records
-    time_data = ([x, x.hour, x.day, x.week, x.month, x.year, x.dayofweek] for x in t)
+    # time_data = ([x, x.hour, x.day, x.week, x.month, x.year, x.dayofweek] for x in t)
+    # fix: instead of using iteration, use pandas.to_datetime() function that is guaranteed to run much faster with much less code to write
+    time_data =[t, t.dt.hour, t.dt.day, t.dt.week, t.dt.month, t.dt.year, t.dt.weekday]
     column_labels = ('start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday')
-    time_df = pd.DataFrame(time_data, columns=column_labels)
+    time_dict = {
+        'start_time':t,
+        'hour':t.dt.hour,
+        'day':t.dt.day,
+        'week':t.dt.week,
+        'month':t.dt.month,
+        'year':t.dt.year,
+        'weekday':t.dt.weekday
+    }
+    # time_df = pd.DataFrame(time_data, columns=column_labels)
+    time_df = pd.DataFrame.from_dict(time_dict)
 
     for i, row in time_df.iterrows():
         cur.execute(time_table_insert, list(row))
